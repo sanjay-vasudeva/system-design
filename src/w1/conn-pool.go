@@ -2,33 +2,72 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type Config struct {
+	Database struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+}
+
 func main() {
+	f, err := os.Open("config.json")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	var cfg Config
+	json.NewDecoder(f).Decode(&cfg)
+	fmt.Println(cfg)
+
 	chn := make(chan int, 1)
 	chn <- 12
 	close(chn)
 	for i := range chn {
 		fmt.Println(i)
 	}
-	db, err := sql.Open("mysql", "airflow_user:Airflow123!@/airflow_db")
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		"root",
+		"password",
+		"localhost",
+		"3306",
+		"sakila",
+	)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
 	}
-	rows, err := db.Query("select 1")
+	defer db.Close()
+
+	rows, err := db.Query("select * from actor limit 10")
 	if err != nil {
 		panic(err)
 	}
-	for {
-		if !rows.Next() {
-			break
+	defer rows.Close()
+
+	cols, _ := rows.Columns()
+	for i, v := range cols {
+		fmt.Printf("value @ %v: %v\n", i, v)
+	}
+	for rows.Next() {
+		var actorId int
+		var firstname string
+		var lastname string
+		var lastUpdate time.Time
+
+		err = rows.Scan(&actorId, &firstname, &lastname, &lastUpdate)
+		if err != nil {
+			panic(err)
 		}
-		cols, _ := rows.Columns()
-		for i, v := range cols {
-			fmt.Printf("value @ %v: %v", i, v)
-		}
+		lastUpdateStr := lastUpdate.Format(time.RFC1123)
+		fmt.Printf("value: %d %s %s %s\n", actorId, firstname, lastname, lastUpdateStr)
 	}
 }

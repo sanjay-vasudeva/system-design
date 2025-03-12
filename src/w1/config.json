@@ -1,0 +1,6 @@
+{
+    "Database": {
+        "Host": "localhost",
+        "Port": 3306
+    }
+}
