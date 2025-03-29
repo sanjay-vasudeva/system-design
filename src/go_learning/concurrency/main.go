@@ -6,22 +6,42 @@ import (
 	"time"
 )
 
-func boring(msg string, c chan string) {
-	for i := 0; ; i++ {
-		c <- fmt.Sprintf("%s %d", msg, i)
-		time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
-	}
-}
-func basic_goroutine() {
+func boring(msg string) <-chan string {
 	c := make(chan string)
-	fmt.Println("I'm listening...")
-	go boring("boring", c)
-	for i := 0; i < 5; i++ {
-		fmt.Printf("You say %q\n", <-c)
-	}
-	fmt.Println("You're boring.. I'm leaving")
+	go func() {
+		for i := 0; ; i++ {
+			c <- fmt.Sprintf("%s %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+	}()
+	return c
 }
 
+func fanIn(input1, input2 <-chan string) <-chan string {
+	c := make(chan string)
+	go func() {
+		for {
+			c <- <-input1
+		}
+	}()
+	go func() {
+		for {
+			c <- <-input2
+		}
+	}()
+	return c
+}
 func main() {
-	basic_goroutine()
+	// fmt.Println("I'm listening...")
+	// c := boring("boring")
+	// for i := 0; i < 5; i++ {
+	// 	fmt.Printf("You say %q\n", <-c)
+	// }
+	// fmt.Println("You're boring.. I'm leaving")
+	c := fanIn(boring("joe"), boring("ann"))
+	for i := 0; i < 10; i++ {
+		fmt.Println(<-c)
+	}
+	fmt.Println("You're both boring.. I'm leaving")
+
 }
