@@ -51,16 +51,19 @@ func fakeSearch(kind string) Search {
 }
 
 var (
-	Web   = fakeSearch("web")
-	Image = fakeSearch("image")
-	Video = fakeSearch("video")
+	Web1   = fakeSearch("web1")
+	Web2   = fakeSearch("web2")
+	Image1 = fakeSearch("image1")
+	Image2 = fakeSearch("image2")
+	Video1 = fakeSearch("video1")
+	Video2 = fakeSearch("video2")
 )
 
 func Google(query string) (results []Result) {
 	c := make(chan Result)
-	go func() { c <- Web(query) }()
-	go func() { c <- Image(query) }()
-	go func() { c <- Video(query) }()
+	go func() { c <- First(query, Web1, Web2) }()
+	go func() { c <- First(query, Image1, Image2) }()
+	go func() { c <- First(query, Video1, Video2) }()
 
 	timeout := time.After(80 * time.Millisecond)
 	for range 3 {
@@ -73,6 +76,14 @@ func Google(query string) (results []Result) {
 		}
 	}
 	return
+}
+
+func First(query string, replicas ...Search) Result {
+	c := make(chan Result)
+	for i := range replicas {
+		go func() { c <- replicas[i](query) }()
+	}
+	return <-c
 }
 func main() {
 	// fmt.Println("I'm listening...")
