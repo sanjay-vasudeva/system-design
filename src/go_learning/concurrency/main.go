@@ -6,19 +6,21 @@ import (
 	"time"
 )
 
-func boring(msg string) <-chan string {
-	c := make(chan string)
+func boring(msg string) <-chan Message {
+	c := make(chan Message)
 	go func() {
+		waitForIt := make(chan bool)
 		for i := 0; ; i++ {
-			c <- fmt.Sprintf("%s %d", msg, i)
+			c <- Message{msg: fmt.Sprintf("%s %d", msg, i), wait: waitForIt}
 			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+			<-waitForIt
 		}
 	}()
 	return c
 }
 
-func fanIn(input1, input2 <-chan string) <-chan string {
-	c := make(chan string)
+func fanIn(input1, input2 <-chan Message) <-chan Message {
+	c := make(chan Message)
 	go func() {
 		for {
 			c <- <-input1
@@ -31,6 +33,12 @@ func fanIn(input1, input2 <-chan string) <-chan string {
 	}()
 	return c
 }
+
+type Message struct {
+	msg  string
+	wait chan bool
+}
+
 func main() {
 	// fmt.Println("I'm listening...")
 	// c := boring("boring")
@@ -39,8 +47,13 @@ func main() {
 	// }
 	// fmt.Println("You're boring.. I'm leaving")
 	c := fanIn(boring("joe"), boring("ann"))
-	for i := 0; i < 10; i++ {
-		fmt.Println(<-c)
+	for range 10 {
+		msg1 := <-c
+		fmt.Println(msg1.msg)
+		msg2 := <-c
+		fmt.Println(msg2.msg)
+		msg1.wait <- true
+		msg2.wait <- true
 	}
 	fmt.Println("You're both boring.. I'm leaving")
 
