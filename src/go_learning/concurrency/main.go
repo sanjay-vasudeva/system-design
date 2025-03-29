@@ -57,9 +57,14 @@ var (
 )
 
 func Google(query string) (results []Result) {
-	results = append(results, Web(query))
-	results = append(results, Image(query))
-	results = append(results, Video(query))
+	c := make(chan Result)
+	go func() { c <- Web(query) }()
+	go func() { c <- Image(query) }()
+	go func() { c <- Video(query) }()
+
+	for range 3 {
+		results = append(results, <-c)
+	}
 	return
 }
 func main() {
