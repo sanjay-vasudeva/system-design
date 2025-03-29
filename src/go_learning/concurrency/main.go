@@ -21,14 +21,15 @@ func boring(msg string) <-chan Message {
 
 func fanIn(input1, input2 <-chan Message) <-chan Message {
 	c := make(chan Message)
+
 	go func() {
 		for {
-			c <- <-input1
-		}
-	}()
-	go func() {
-		for {
-			c <- <-input2
+			select {
+			case s := <-input1:
+				c <- s
+			case s := <-input2:
+				c <- s
+			}
 		}
 	}()
 	return c
@@ -46,15 +47,15 @@ func main() {
 	// 	fmt.Printf("You say %q\n", <-c)
 	// }
 	// fmt.Println("You're boring.. I'm leaving")
-	c := fanIn(boring("joe"), boring("ann"))
-	for range 10 {
-		msg1 := <-c
-		fmt.Println(msg1.msg)
-		msg2 := <-c
-		fmt.Println(msg2.msg)
-		msg1.wait <- true
-		msg2.wait <- true
-	}
-	fmt.Println("You're both boring.. I'm leaving")
+	// c := fanIn(boring("joe"), boring("ann"))
+	// for range 10 {
+	// 	msg1 := <-c
+	// 	fmt.Println(msg1.msg)
+	// 	msg2 := <-c
+	// 	fmt.Println(msg2.msg)
+	// 	msg1.wait <- true
+	// 	msg2.wait <- true
+	// }
+	// fmt.Println("You're both boring.. I'm leaving")
 
 }
