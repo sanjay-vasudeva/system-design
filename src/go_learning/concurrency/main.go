@@ -40,6 +40,28 @@ type Message struct {
 	wait chan bool
 }
 
+type Result string
+type Search func(query string) Result
+
+func fakeSearch(kind string) Search {
+	return func(query string) Result {
+		time.Sleep((time.Duration(rand.Intn(100)) * time.Millisecond))
+		return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+	}
+}
+
+var (
+	Web   = fakeSearch("web")
+	Image = fakeSearch("image")
+	Video = fakeSearch("video")
+)
+
+func Google(query string) (results []Result) {
+	results = append(results, Web(query))
+	results = append(results, Image(query))
+	results = append(results, Video(query))
+	return
+}
 func main() {
 	// fmt.Println("I'm listening...")
 	// c := boring("boring")
@@ -58,4 +80,24 @@ func main() {
 	// }
 	// fmt.Println("You're both boring.. I'm leaving")
 
+	//Timeout using select
+	// c := boring("joe")
+	// timeout := time.After(3 * time.Second)
+	// for {
+	// 	select {
+	// 	case s := <-c:
+	// 		fmt.Println(s.msg)
+	// 		s.wait <- true
+	// 	case <-timeout:
+	// 		fmt.Println("You're too slow..")
+	// 		return
+	// 	}
+	// }
+
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang")
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Printf("Search took %s\n", elapsed)
 }
