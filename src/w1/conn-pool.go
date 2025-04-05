@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -23,7 +24,7 @@ func main() {
 		panic(err)
 	}
 	defer f.Close()
-
+	LockAndGoroutineTest()
 	var cfg Config
 	json.NewDecoder(f).Decode(&cfg)
 	fmt.Println(cfg)
@@ -70,4 +71,14 @@ func main() {
 		lastUpdateStr := lastUpdate.Format(time.RFC1123)
 		fmt.Printf("value: %d %s %s %s\n", actorId, firstname, lastname, lastUpdateStr)
 	}
+}
+
+func LockAndGoroutineTest() {
+	var mu sync.Mutex = sync.Mutex{}
+	func() {
+		mu.Lock()
+		defer mu.Unlock()
+		fmt.Println("Lock acquired")
+	}()
+	mu.Lock()
 }
