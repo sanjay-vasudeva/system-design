@@ -4,14 +4,14 @@ import (
 	"sync"
 )
 
-type BlockingQueue struct {
+type BlockingQueue[T any] struct {
 	mu       *sync.Mutex
 	capacity int
-	data     []any
+	data     []T
 	cond     *sync.Cond
 }
 
-func (queue *BlockingQueue) Put(item any) {
+func (queue *BlockingQueue[T]) Put(item T) {
 	queue.cond.L.Lock()
 	defer queue.cond.L.Unlock()
 
@@ -22,11 +22,11 @@ func (queue *BlockingQueue) Put(item any) {
 	queue.cond.Signal()
 }
 
-func (queue *BlockingQueue) IsFull() bool {
+func (queue *BlockingQueue[T]) IsFull() bool {
 	return len(queue.data) >= queue.capacity
 }
 
-func (queue *BlockingQueue) Take() any {
+func (queue *BlockingQueue[T]) Take() T {
 	queue.cond.L.Lock()
 	defer queue.cond.L.Unlock()
 
@@ -39,15 +39,15 @@ func (queue *BlockingQueue) Take() any {
 	return item
 }
 
-func (queue *BlockingQueue) IsEmpty() bool {
+func (queue *BlockingQueue[T]) IsEmpty() bool {
 	return len(queue.data) == 0
 }
 
-func NewBlockingQueue(capacity int) *BlockingQueue {
-	queue := &BlockingQueue{
+func NewBlockingQueue[T any](capacity int) *BlockingQueue[T] {
+	queue := &BlockingQueue[T]{
 		mu:       &sync.Mutex{},
 		capacity: capacity,
-		data:     make([]any, 0, capacity),
+		data:     make([]T, 0, capacity),
 	}
 	queue.cond = &sync.Cond{L: queue.mu}
 	return queue
