@@ -18,7 +18,7 @@ type Config struct {
 	}
 }
 
-func main() {
+func explaination() {
 	f, err := os.Open("config.json")
 	if err != nil {
 		panic(err)
