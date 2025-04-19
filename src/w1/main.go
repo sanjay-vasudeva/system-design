@@ -1,7 +1,8 @@
 package main
 
 import (
-	"net/http"
+	"sync"
+	mq "w1/rabbit-mq"
 )
 
 func main() {
@@ -13,6 +14,34 @@ func main() {
 	// benchmarkNonPool(150)
 	// benchmarkPool(10000)
 
-	http.HandleFunc("/events", eventHandler)
-	http.ListenAndServe(":8080", nil)
+	//sse
+	// http.HandleFunc("/events", sse.EventHandler)
+	// http.ListenAndServe(":8080", nil)
+
+	//rabbitmq
+	var wg sync.WaitGroup
+
+	// go func() {
+	// 	mq.Receive()
+	// 	wg.Done()
+	// }()
+	// go func() {
+	// 	mq.Send()
+	// 	wg.Done()
+	// }()
+	consumers := 2
+	for i := range consumers {
+		wg.Add(1)
+		go func() {
+			mq.Consume(i)
+			wg.Done()
+		}()
+	}
+	wg.Add(1)
+
+	go func() {
+		mq.CreateTasks()
+		wg.Done()
+	}()
+	wg.Wait()
 }

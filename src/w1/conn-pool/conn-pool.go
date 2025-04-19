@@ -1,15 +1,16 @@
-package main
+package connPool
 
 import (
 	"database/sql"
 	"fmt"
 	"sync"
 	"time"
+	q "w1/queue"
 )
 
 type ConnectionPool struct {
 	maxConnections int
-	pool           *BlockingQueue[*sql.DB]
+	pool           *q.BlockingQueue[*sql.DB]
 }
 
 func (cp *ConnectionPool) Take() *sql.DB {
@@ -24,7 +25,7 @@ func (cp *ConnectionPool) Put(db *sql.DB) {
 func NewConnectionPool(maxConn int) *ConnectionPool {
 	cp := ConnectionPool{
 		maxConnections: maxConn,
-		pool:           NewBlockingQueue[*sql.DB](maxConn),
+		pool:           q.NewBlockingQueue[*sql.DB](maxConn),
 	}
 	for range maxConn {
 		cp.pool.Put(newConn())

@@ -1,4 +1,4 @@
-package main
+package blocking_queue
 
 import (
 	"sync"

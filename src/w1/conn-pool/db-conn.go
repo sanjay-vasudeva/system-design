@@ -1,4 +1,4 @@
-package main
+package connPool
 
 import (
 	"database/sql"

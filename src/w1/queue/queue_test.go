@@ -1,4 +1,4 @@
-package main
+package blocking_queue
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 // Testing
 func TestBlockingQueue(t *testing.T) {
-	q := NewBlockingQueue(1)
+	q := NewBlockingQueue[int](1)
 	c := make(chan bool)
 
 	go func() {
