@@ -1,8 +1,12 @@
 package main
 
 import (
-	"sync"
-	mq "w1/rabbit-mq"
+
+	// "sync"
+	// mq "w1/rabbit-mq"
+	"w1/polling"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -19,7 +23,7 @@ func main() {
 	// http.ListenAndServe(":8080", nil)
 
 	//rabbitmq
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	// go func() {
 	// 	mq.Receive()
@@ -29,19 +33,23 @@ func main() {
 	// 	mq.Send()
 	// 	wg.Done()
 	// }()
-	consumers := 2
-	for i := range consumers {
-		wg.Add(1)
-		go func() {
-			mq.Consume(i)
-			wg.Done()
-		}()
-	}
-	wg.Add(1)
+	// consumers := 2
+	// for i := range consumers {
+	// 	wg.Add(1)
+	// 	go func() {
+	// 		mq.Consume(i)
+	// 		wg.Done()
+	// 	}()
+	// }
+	// wg.Add(1)
 
-	go func() {
-		mq.CreateTasks()
-		wg.Done()
-	}()
-	wg.Wait()
+	// go func() {
+	// 	mq.CreateTasks()
+	// 	wg.Done()
+	// }()
+	// wg.Wait()
+	r := gin.Default()
+	polling.SetupServer(r)
+	r.Run(":8080")
+
 }

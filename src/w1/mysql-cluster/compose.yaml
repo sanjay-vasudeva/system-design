@@ -1,5 +1,9 @@
 version: "3.9"
 services:
+  proxy:
+    image: proxysql/proxysql
+    container_name: proxysql
+    
   mysql-dev1:
       build: .
       command: --default-authentication-plugin=mysql_native_password
@@ -17,7 +21,10 @@ services:
         MYSQL_ROOT_PASSWORD: password
       ports:
       - "3307:3306"
-      volumes:
+      # Admin ports
+      - "6032:6032" # Admin interface
+      - "6033:6033" # MySQL client connections
+      volumes:  
       - ./db-data2:/var/lib/mysql
   
   mysql-dev3:
