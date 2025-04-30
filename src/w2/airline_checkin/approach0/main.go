@@ -1,7 +1,7 @@
 package main
 
 import (
-	"airline_checkin/io"
+	utils "airline_checkin/internal/utils"
 	"fmt"
 	"sync"
 	"time"
@@ -14,13 +14,13 @@ type user struct {
 
 func main() {
 	book()
-	io.PrintSeats()
-	io.Clean()
+	utils.PrintSeats()
+	utils.Clean()
 }
 
 func book() {
 	start := time.Now()
-	db := io.NewConn()
+	db := utils.NewConn()
 	rows, err := db.Query("SELECT id,name from airline_checkin.users")
 	if err != nil {
 		panic(err)

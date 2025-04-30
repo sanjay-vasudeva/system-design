@@ -10,6 +10,12 @@ import (
 var numberOfPrimes int32
 var MAX_INT int = 100000000
 
+func main() {
+	//basic_single()
+	//basic_multi(10)
+	// fair_multi(10)
+}
+
 func checkPrime(i int) {
 	if i < 2 {
 		return

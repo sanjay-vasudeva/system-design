@@ -1,11 +1,14 @@
-package connPool
+package main
 
 import (
 	"database/sql"
 	"fmt"
 	"sync"
 	"time"
-	q "w1/queue"
+
+	q "github.com/sanjay-vasudeva/queue"
+
+	ioutil "github.com/sanjay-vasudeva/ioutil"
 )
 
 type ConnectionPool struct {
@@ -28,7 +31,7 @@ func NewConnectionPool(maxConn int) *ConnectionPool {
 		pool:           q.NewBlockingQueue[*sql.DB](maxConn),
 	}
 	for range maxConn {
-		cp.pool.Put(newConn())
+		cp.pool.Put(ioutil.NewConn("3306", "root", "password", "sakila"))
 	}
 	return &cp
 }
@@ -40,7 +43,7 @@ func benchmarkNonPool(count int) {
 	for range count {
 		go func() {
 			defer wg.Done()
-			db := newConn()
+			db := ioutil.NewConn("3306", "root", "password", "sakila")
 			defer db.Close()
 
 			_, err := db.Exec("SELECT SLEEP(0.01);")
@@ -72,4 +75,12 @@ func benchmarkPool(count int) {
 	}
 	wg.Wait()
 	fmt.Printf("Time taken: %v\n", time.Since(now))
+}
+
+func main() {
+
+	//cp := NewConnectionPool(5)
+	// benchmarkNonPool(150)
+	// benchmarkPool(10000)
+
 }

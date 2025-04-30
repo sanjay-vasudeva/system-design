@@ -3,18 +3,18 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"kv/io"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	io "github.com/sanjay-vasudeva/ioutil"
 )
 
 func main() {
 	r := gin.Default()
 
-	db := io.NewConn("3306")
-	dbRead := io.NewConn("3307")
+	db := NewConn("3306")
+	dbRead := NewConn("3307")
 	r.GET("/", func(ctx *gin.Context) {
 		key := ctx.Query("key")
 		consistent := ctx.Query("consistent")
@@ -131,4 +131,8 @@ func deleteKey2(key string, db *sql.DB) {
 // so that we can save 2 disk IOs. One in clustered index and other in secondary index
 func deleteKey3(key string, db *sql.DB) {
 	db.Exec("UPDATE kv.store set expired_at = -1 where k = ? and expired_at > UNIX_TIMESTAMP()", key)
+}
+
+func NewConn(port string) *sql.DB {
+	return io.NewConn(port, "root", "password", "kv")
 }

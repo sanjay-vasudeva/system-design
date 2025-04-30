@@ -1,4 +1,4 @@
-package polling
+package main
 
 import (
 	"fmt"
@@ -17,6 +17,12 @@ type EC2 struct {
 }
 
 var db sync.Map
+
+func main() {
+	r := gin.Default()
+	SetupServer(r)
+	r.Run(":8080")
+}
 
 func CreateEC2(id int) {
 	fmt.Println("creating EC2 with ID:", id)

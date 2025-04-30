@@ -1,4 +1,4 @@
-package connPool
+package main
 
 import (
 	"database/sql"
@@ -18,20 +18,6 @@ type Config struct {
 	}
 }
 
-func newConn() *sql.DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		"root",
-		"password",
-		"localhost",
-		"3306",
-		"sakila",
-	)
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		panic(err)
-	}
-	return db
-}
 func explaination() {
 	f, err := os.Open("config.json")
 	if err != nil {

@@ -1,6 +1,11 @@
-package io
+package utils
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+
+	io "github.com/sanjay-vasudeva/ioutil"
+)
 
 func PrintSeats() {
 	fmt.Println()
@@ -39,4 +44,8 @@ func Clean() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func NewConn() *sql.DB {
+	return io.NewConn("3306", "root", "password", "airline_checkin")
 }

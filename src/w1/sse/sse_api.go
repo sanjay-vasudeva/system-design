@@ -1,4 +1,4 @@
-package sse
+package main
 
 import (
 	"fmt"
@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func main() {
+	http.HandleFunc("/events", EventHandler)
+	http.ListenAndServe(":8080", nil)
+}
 func EventHandler(w http.ResponseWriter, r *http.Request) {
 	// Set CORS headers to allow all origins. You may want to restrict this to specific origins in a production environment.
 	w.Header().Set("Access-Control-Allow-Origin", "*")

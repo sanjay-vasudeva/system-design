@@ -1,4 +1,4 @@
-package io
+package ioutil
 
 import (
 	"database/sql"
@@ -7,13 +7,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func NewConn(port string) *sql.DB {
+func NewConn(port string, username string, password string, database string) *sql.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		"root",
-		"password",
+		username,
+		password,
 		"localhost",
 		port,
-		"kv",
+		database,
 	)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

@@ -1,7 +1,8 @@
-package optimisticlock
+package main
 
 import (
 	"fmt"
+	"sync"
 	"sync/atomic"
 )
 
@@ -13,4 +14,18 @@ func IncrementCounter() {
 	if !count.CompareAndSwap(oldValue, newValue) {
 		fmt.Println("Increment failed")
 	}
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+
+	for range 1000 {
+		wg.Add(1)
+		go func() {
+			IncrementCounter()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
 }
