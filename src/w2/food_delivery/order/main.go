@@ -1,25 +1,54 @@
-package order
+package main
 
 import (
-	ioutil "github.com/sanjay-vasudeva/ioutil"
+	"fmt"
+	"order/svc"
+	"sync"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/sanjay-vasudeva/ioutil"
 )
 
 func main() {
-	r := gin.Default()
+	// reset()
+	var wg sync.WaitGroup
+	start := time.Now()
+	for range 10 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// Simulate some work
+			order, err := svc.PlaceOrder()
+			if err != nil {
+				fmt.Println("Error placing order:", err)
+				return
+			}
+			fmt.Println("Order placed successfully:", order.ID)
+		}()
+	}
+	wg.Wait()
+	fmt.Printf("Took %f seconds", time.Since(start).Seconds())
+}
 
-	ioutil.NewConn("3306", "root", "password", "delivery")
-	r.POST("/order", func(c *gin.Context) {
+func reset() {
+	conn := ioutil.NewConn("3308", "root", "password", "delivery")
+	tx, err := conn.Begin()
+	if err != nil {
+		panic(err)
+	}
+	_, err = tx.Exec("UPDATE stock SET is_reserved = 0, order_id = NULL")
+	if err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-		// reserve food
-		// reserve agent
-
-		// commit food
-		// commit agent
-
-		// place order
-	})
-
-	r.Run(":8080")
+	_, err = tx.Exec("UPDATE agent SET is_reserved = 0, order_id = NULL")
+	if err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
 }

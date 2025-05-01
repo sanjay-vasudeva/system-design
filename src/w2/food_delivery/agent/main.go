@@ -1,0 +1,39 @@
+package main
+
+import (
+	"delivery/src"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sanjay-vasudeva/ioutil"
+)
+
+func main() {
+	r := gin.Default()
+	db := ioutil.NewConn("3308", "root", "password", "delivery")
+
+	r.POST("/agent/reserve", func(c *gin.Context) {
+		agent, err := src.Reserve(db)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, agent)
+	})
+
+	r.POST("/agent/book", func(c *gin.Context) {
+		orderID := c.Query("order_id")
+		if orderID == "" {
+			c.JSON(400, gin.H{"error": "order_id is required"})
+			return
+		}
+
+		agent, err := src.Book(orderID, db)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, agent)
+	})
+
+	r.Run(":8081")
+}
