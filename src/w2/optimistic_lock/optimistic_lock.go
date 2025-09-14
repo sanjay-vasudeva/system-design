@@ -13,6 +13,8 @@ func IncrementCounter() {
 	newValue := oldValue + 1
 	if !count.CompareAndSwap(oldValue, newValue) {
 		fmt.Println("Increment failed")
+	} else {
+		fmt.Println("Increment successful, new value:", newValue)
 	}
 }
 
